@@ -1,43 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
+# In[ ]:
 
-
-#!/usr/bin/env python
-# coding: utf-8
-
-#  
-# 
-# ## 주봉
-# 
-# 스토캐스틱 %K가 %D보다 위에
-# 
-# 스토캐스틱 상승추세 
-# 
-#  
-# 
-# ## 일봉
-# 
-# 스토캐스틱 상승추세
-# 
-#  Macd Histororim  이틀연속 상승추세
-# 
-#  OBV Signal  하루전 이틀전보다 더 높은경우 (상승추세)
-# 
-#  
-# ## 60분봉
-# 
-# Macd 3봉이네 돌파
-# 
-# Macd 상승추세
-# 
-#  
-# ## 30분봉
-# 
-#  Macd 상승추세
-
-# In[8]:
 
 
 import pyupbit
@@ -52,9 +17,10 @@ import numpy as np
 import time
 import requests
 
-access_key = "??"
-secret_key = "??"
-myToken = "?x?"
+access_key = "9N4F5hD4a7KMemJP3KMfOT7qsNB2m1H60f5di5ol"
+secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX"
+myToken = "xoxb-2871923715953-2852604955318-JSvncgEPKEBl2s78EYrSmxBq"
+
 
 
 payload = {
@@ -114,12 +80,17 @@ def rsiindex(symbol):
         return pd.Series(100 - (100 / (1 + RS)), name="RSI")
 
     rsi = rsi(df, 14).iloc[-1]
-#     print(symbol)
-#     print('upbit 1day RSI:', rsi)
-#     print('')
-#     time.sleep(1)
+    print(symbol)
+    print('upbit 1day RSI:', rsi)
+    print('')
+    time.sleep(1)
 
+#################################### 평균 거래량 ########################    
+def get_va(df, n,symbol):
+    return df['volume'].rolling(window=n).mean()
+    
 #################################### sto RSI #######################################
+
 
 
 def stockrsiweeks(symbol):
@@ -156,6 +127,9 @@ def stockrsiweeks(symbol):
     stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
     stochrsi_K = stochrsi.rolling(smoothK).mean()
     stochrsi_D = stochrsi_K.rolling(smoothD).mean()
+
+    
+    
 
     condition = False;
     yyester_K=stochrsi_K.iloc[-3]*100
@@ -225,7 +199,6 @@ def stockrsidays(symbol):
     print('upbit 1day stoch_rsi_D: ', stochrsi_D.iloc[-1]*100)
     print('') '''
 
-    
     condition = False;
     yyester_K=stochrsi_K.iloc[-3]*100
     yyester_D=stochrsi_D.iloc[-3]*100
@@ -275,6 +248,7 @@ def macddays(symbol):
     print("\n")
     test1=exp3[0]-macd[0]
     test2=exp3[1]-macd[1]
+
     call='매매 필요없음'
     if test1<0 and test2>0:
        call='매도'
@@ -317,6 +291,7 @@ def macd60m(symbol):
     print("\n")
     test1=exp3[0]-macd[0]
     test2=exp3[1]-macd[1]
+
     call='매매 필요없음'
     if test1<0 and test2>0:
        call='매도'
@@ -326,18 +301,18 @@ def macd60m(symbol):
     '''#36 37 38
     #print(macd[0], exp3[0] ," ww ",macd[1], exp3[1], " ww ", macd[2], exp3[2])
     condition = False
-    if((macd[3]-exp3[3])>0 and (macd[3]-exp3[3])<(macd[2]-exp3[2]) and (macd[2]-exp3[2])<(macd[1]-exp3[1]) and 
+    if((macd[3]-exp3[3])<(macd[2]-exp3[2]) and (macd[2]-exp3[2])<(macd[1]-exp3[1]) and 
        (macd[1]-exp3[1])<(macd[0]-exp3[0])):
         condition = True
 
     return condition
 
-def macd30m(symbol):
+def macd3m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/30"
+    url = "https://api.upbit.com/v1/candles/minutes/3"
 
 
-    querystring = {"market":symbol,"count":"200"}
+    querystring = {"market":symbol,"count":"30"}
 
     response = requests.request("GET", url, params=querystring)
 
@@ -360,6 +335,7 @@ def macd30m(symbol):
     print("\n")
     test1=exp3[0]-macd[0]
     test2=exp3[1]-macd[1]
+
     call='매매 필요없음'
     if test1<0 and test2>0:
        call='매도'
@@ -369,11 +345,69 @@ def macd30m(symbol):
     '''#36 37 38
     #print(macd[0], exp3[0] ," ww ",macd[1], exp3[1], " ww ", macd[2], exp3[2])
     condition = False
-    if((macd[1]-exp3[1])<(macd[0]-exp3[0])):
+    if(macd[1]-exp3[1]<0 and macd[0]-exp3[0]>0):
+        condition = True
+
+    return condition
+
+
+
+
+def macd30m(symbol):
+
+    url = "https://api.upbit.com/v1/candles/minutes/30"
+
+
+    querystring = {"market":symbol,"count":"200"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    ##거래량평균
+    df = pyupbit.get_ohlcv(ticker=symbol)
+    va5 = get_va(df, 5,symbol)
+    va20 = get_va(df, 20,symbol)
+    
+    
+    data[0]['candle_acc_trade_volume']
+    
+
+    ## 여기까지
+    
+    df = pd.DataFrame(data)
+
+    df=df.iloc[::-1]
+
+    df=df['trade_price']
+
+    exp1 = df.ewm(span=12, adjust=False).mean() 
+    exp2 = df.ewm(span=26, adjust=False).mean()
+    macd = exp1-exp2
+    exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
+    
+    
+    '''
+    print('MACD: ',macd[0])
+    print('Signal: ',exp3[0])
+    print("ocilator:",macd[0]-exp3[0])
+    print("\n")
+    test1=exp3[0]-macd[0]
+    test2=exp3[1]-macd[1]
+
+    call='매매 필요없음'
+    if test1<0 and test2>0:
+       call='매도'
+    if test1>0 and test2<0:
+       call='매수'
+    time.sleep(1)
+    '''#36 37 38
+    #print(macd[0], exp3[0] ," ww ",macd[1], exp3[1], " ww ", macd[2], exp3[2])
+    condition = False
+    if((macd[1]-exp3[1])<(macd[0]-exp3[0] and data[0]['candle_acc_trade_volume'] > va20.iloc[-1]) and va5.iloc[-1] < va20.iloc[-1]):
         condition = True
     #print(macd[0], macd[1], exp3[0], exp3[1])
     return condition
-# macd30m("KRW-BTC")
 
 #################################### OBV #######################################
 
@@ -431,7 +465,7 @@ def obv(symbol):
 sell_list = []    # 빈 리스트 생성
 
 post_message(myToken,"#upbit", "autotrade start")
-
+sellmust_list = []
 # buy = False
 # #print(stockrsidays(coin) ,macddays(coin) ,obv(coin) ,stockrsiweeks(coin) , macd60m(coin),macd30m(coin))
 # if(stockrsidays(symbol) and macddays(symbol) and obv(symbol) and stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol)):
@@ -447,9 +481,18 @@ while True:
     try:
 
         for symbol in krw_tickers:
+            
+
             if(float(data[0]['balance'])>300000*1.0005):
+                
+                buy = True
+                for sell in sell_list:
+                    if(sell[0] == symbol):
+                        buy = False
+                        
                 if(stockrsidays(symbol) and macddays(symbol) and obv(symbol) and stockrsiweeks(symbol) and macd60m(symbol) and
-                   macd30m(symbol)):
+                   macd30m(symbol) and macd3m(symbol) and buy):
+                    time.sleep(1)
                     buy_result = upbit.buy_market_order(symbol, 300000)
                     forselling = []
                     current_price = pyupbit.get_current_price(symbol)
@@ -465,19 +508,140 @@ while True:
         # 0 이름, 1 구매한 총 가격 300000, 2 구매했을때 코인 가격, 3 구매한 코인 개수
         for coin_selling in sell_list:
             coin_price = pyupbit.get_current_price(coin_selling[0])
+            
+            mustselltime = False
+            for sellmust in sellmust_list:
+                if (sellmust == coin_selling[0]):
+                    mustselltime = True
+                    
+            if(mustselltime):
+                url = "https://api.upbit.com/v1/candles/days?market="+coin_selling[0]+"&count=3"
+                headers = {"Accept": "application/json"}
+                response = requests.request("GET", url, headers=headers)
+                sellcheck=response.json()
 
-            if (coin_selling[2]*1.08 < coin_price):
-                sell_result = upbit.sell_market_order(coin_selling[0], coin_selling[3])
-                post_message(myToken,"#upbit", coin_selling[0]+"coin good sell : " +str(sell_result))
+                mosthigh = sellcheck[0]['high_price']
 
+                if(mosthigh < sellcheck[1]['high_price']):
+                    mosthigh = sellcheck[1]['high_price']
+                    if (mosthigh <sellcheck[2]['high_price']):
+                        mosthigh = sellcheck[2]['high_price']
+            
+                if(mosthigh*0.98 > coin_price):
+                    time.sleep(1)
+                    sell_result = upbit.sell_market_order(coin_selling[0], coin_selling[3])
+                    post_message(myToken,"#upbit", coin_selling[0]+"coin good sell : " +str(sell_result))
+                    for i in range(len(sell_list)):
+                        if(sell_list[i][0] == coin_selling[0]):
+                            del sell_list[i]
+                    for i in range(len(sellmust_list)):
+                        if (sellmust_list[i] == coin_selling[0]):
+                            del sellmust_list[i]
+                    
+                    
+    
+        
+        
+            overlap_test = True
+            for i in sellmust_list:
+                if(i == coin_selling[0]):
+                    overlap_test = False
+                
+            
+            
+            if (coin_selling[2]*1.08 < coin_price and overlap_test):
+                sellmust_list.append(coin_selling[0])
+                time.sleep(1)
             if(coin_selling[2]*0.95 > coin_price):
+                time.sleep(1)
                 sell_result = upbit.sell_market_order(coin_selling[0], coin_selling[3])
                 post_message(myToken,"#upbit", coin_selling[0]+"coin dead sell : " +str(sell_result))
+                for i in range(len(sell_list)):
+                    if(sell_list[i][0] == coin_selling[0]):
+                        del sell_list[i]
+
+                
+                
         time.sleep(1)
-        print(sell_list)
-        
     except Exception as e:
         print(e)
         post_message(myToken,"#upbit", e)
         time.sleep(1)
+
+
+# In[164]:
+
+
+# 평균거래량 5일선 20일선
+
+# def get_va(df, n,symbol):
+#     return df['volume'].rolling(window=n).mean()
+
+# df = pyupbit.get_ohlcv(ticker=symbol)
+# va5 = get_va(df, 5,symbol)
+# va20 = get_va(df, 20,symbol)
+
+# print(va5.iloc[-1], va20.iloc[-1])
+
+
+# In[165]:
+
+
+# 평균거래량 30분봉에 넣은거
+
+# def macd30m(symbol):
+
+#     url = "https://api.upbit.com/v1/candles/minutes/30"
+
+
+#     querystring = {"market":symbol,"count":"200"}
+
+#     response = requests.request("GET", url, params=querystring)
+
+#     data = response.json()
+
+#     ##거래량평균
+#     df = pyupbit.get_ohlcv(ticker=symbol)
+#     va5 = get_va(df, 5,symbol)
+#     va20 = get_va(df, 20,symbol)
+    
+    
+#     data[0]['candle_acc_trade_volume']
+    
+
+#     ## 여기까지
+    
+#     df = pd.DataFrame(data)
+
+#     df=df.iloc[::-1]
+
+#     df=df['trade_price']
+
+#     exp1 = df.ewm(span=12, adjust=False).mean() 
+#     exp2 = df.ewm(span=26, adjust=False).mean()
+#     macd = exp1-exp2
+#     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
+    
+    
+#     '''
+#     print('MACD: ',macd[0])
+#     print('Signal: ',exp3[0])
+#     print("ocilator:",macd[0]-exp3[0])
+#     print("\n")
+#     test1=exp3[0]-macd[0]
+#     test2=exp3[1]-macd[1]
+
+#     call='매매 필요없음'
+#     if test1<0 and test2>0:
+#        call='매도'
+#     if test1>0 and test2<0:
+#        call='매수'
+#     time.sleep(1)
+#     '''#36 37 38
+#     #print(macd[0], exp3[0] ," ww ",macd[1], exp3[1], " ww ", macd[2], exp3[2])
+#     condition = False
+#     if((macd[1]-exp3[1])<(macd[0]-exp3[0] and data[0]['candle_acc_trade_volume'] > va20.iloc[-1]) and va5.iloc[-1] < va20.iloc[-1]):
+#         condition = True
+#     #print(macd[0], macd[1], exp3[0], exp3[1])
+#     return condition
 
