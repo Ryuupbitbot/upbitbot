@@ -1,43 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#  
-# 
-# ## 주봉
-# 
-# 스토캐스틱 %K가 %D보다 위에
-# 
-# 스토캐스틱 상승추세 
-# 
-#  
-# 
-# ## 일봉
-# 
-# 스토캐스틱 상승추세
-# 
-#  Macd Histororim  이틀연속 상승추세
-# 
-#  OBV Signal  하루전 이틀전보다 더 높은경우 (상승추세)
-# 
-#  
-# ## 60분봉
-# 
-# Macd 3봉이네 돌파
-# 
-# Macd 상승추세
-# 
-#  
-# ## 30분봉
-# 
-#  Macd 상승추세
-
-# In[ ]:
-
-
-
-
-
-# In[143]:
+# In[3]:
 
 
 import pyupbit
@@ -331,8 +295,7 @@ def macd60m(symbol):
     '''#36 37 38
     #print(macd[0], exp3[0] ," ww ",macd[1], exp3[1], " ww ", macd[2], exp3[2])
     condition = False
-    if((macd[3]-exp3[3])>0 and (macd[3]-exp3[3])<(macd[2]-exp3[2]) and (macd[2]-exp3[2])<(macd[1]-exp3[1]) and 
-       (macd[1]-exp3[1])<(macd[0]-exp3[0])):
+    if((macd[1]-exp3[1]) < 0 and (macd[0]-exp3[0]) > 0 ):
         condition = True
 
     return condition
@@ -419,8 +382,74 @@ def obv(symbol):
     
     return condition    
 
+def obv60m(symbol):
+    
+    url = "https://api.upbit.com/v1/candles/minutes/60"
+    querystring = {"market":symbol,"count":"500"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    df = pd.DataFrame(data)
+    df=df.iloc[::-1]
+
+    obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
+    #print(obv[3], obv[2],obv[1],obv[0])
+    condition= False
+    if(obv[2]<obv[1] and obv[1]<obv[0]):
+        condition = True
+    
+    return condition 
 
 
+
+def stockrsi60m(symbol):
+    url = "https://api.upbit.com/v1/candles/minutes/60"
+
+    querystring = {"market":symbol,"count":"500"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    df = pd.DataFrame(data)
+
+    series=df['trade_price'].iloc[::-1]
+
+    df = pd.Series(df['trade_price'].values)
+
+    period=14
+    smoothK=3
+    smoothD=3
+
+    delta = series.diff().dropna()
+    ups = delta * 0
+    downs = ups.copy()
+    ups[delta > 0] = delta[delta > 0]
+    downs[delta < 0] = -delta[delta < 0]
+    ups[ups.index[period-1]] = np.mean( ups[:period] )
+    ups = ups.drop(ups.index[:(period-1)])
+    downs[downs.index[period-1]] = np.mean( downs[:period] )
+    downs = downs.drop(downs.index[:(period-1)])
+    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() /          downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
+    rsi = 100 - 100 / (1 + rs)
+
+    stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
+    stochrsi_K = stochrsi.rolling(smoothK).mean()
+    stochrsi_D = stochrsi_K.rolling(smoothD).mean()
+
+
+    condition = False;
+    yyester_K=stochrsi_K.iloc[-3]*100
+    yyester_D=stochrsi_D.iloc[-3]*100
+    yester_K=stochrsi_K.iloc[-2]*100
+    yester_D=stochrsi_D.iloc[-2]*100
+    today_K=stochrsi_K.iloc[-1]*100
+    today_D=stochrsi_D.iloc[-1]*100
+    if(yester_K<today_K and today_K > today_D and today_K < 70):
+        condition=True
+    return condition
 
 
 
@@ -463,7 +492,7 @@ while True:
                         buy = False
                         
                 if(stockrsidays(symbol) and macddays(symbol) and obv(symbol) and stockrsiweeks(symbol) and macd60m(symbol) and
-                   macd30m(symbol) and buy):
+                   obv60m(symbol) and stockrsi60m(symbol) and buy):
                     buy_result = upbit.buy_market_order(symbol, 300000)
                     forselling = []
                     current_price = pyupbit.get_current_price(symbol)
