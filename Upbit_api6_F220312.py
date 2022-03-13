@@ -24,7 +24,7 @@ import datetime
 
 ############################### 프로그램 상수 #####################################
 access_key = "9N4F5hD4a7KMemJP3KMfOT7qsNB2m1H60f5di5ol"
-secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX "
+secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX"
 myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNI"
 
 #투자금액
@@ -162,7 +162,7 @@ def stockrsi60min(symbol):
         condition=True
     return condition
 
-#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 240min (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi240(symbol):
     url = "https://api.upbit.com/v1/candles/minutes/240"
 
@@ -234,7 +234,7 @@ def macddays(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if(macd[2]<macd[1] and macd[1]<macd[0] and macd[0] >exp3[0]):
+    if(macd[1]<macd[0]):
         condition = True
 
     return condition
@@ -291,7 +291,7 @@ def macd30m(symbol):
     macd = exp1-exp2
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
     condition = False
-    if((macd[1]-exp3[1])<(macd[0]-exp3[0])):
+    if(macd[1]<macd[0]):
         condition = True
         
     return condition
@@ -316,7 +316,7 @@ def OBV(tradePrice, volume):
 #코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
 def obv(symbol):
     
-    url = "https://api.upbit.com/v1/candles/days"
+    url = "https://api.upbit.com/v1/candles/60"
     querystring = {"market":symbol,"count":"200"}
 
     response = requests.request("GET", url, params=querystring)
@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
+    if(stockrsiweeks(symbol) and stockrsi60min(symbol) and stockrsi240(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol):
         test = True
     return test
 
