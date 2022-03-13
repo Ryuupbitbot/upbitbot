@@ -22,12 +22,12 @@ import datetime
 
 
 ############################### 프로그램 상수 #####################################
-access_key = ""
-secret_key = ""
-myToken = ""
+access_key = "9N4F5hD4a7KMemJP3KMfOT7qsNB2m1H60f5di5ol"
+secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX "
+myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNl"
 
 #투자금액
-invest_money = 300000
+invest_money = 200000
 
 #거래할 코인
 krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP', 'KRW-ETC', 'KRW-OMG','KRW-SNT','KRW-WAVES', 
@@ -45,8 +45,8 @@ krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP',
 
 #익절,손절 퍼센트
 goodsell_percent = 1.06
-deadsell_percent = 0.95
-buydown_percent = 0.995
+deadsell_percent = 0.93
+buydown_percent = 0.998
 aftergoodsell_percent = 0.985 #goodsell각 이후 1.5퍼 떨어지면 매도
 
 ################################# 함수 ####################################
@@ -78,7 +78,7 @@ def stockrsiweeks(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=14
+    period=19
     smoothK=3
     smoothD=3
 
@@ -108,14 +108,14 @@ def stockrsiweeks(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_D<today_D and today_K > today_D):
+    if(yester_K<today_K and today_K > today_D):
         condition=True
     return condition
 
 
-#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 60mim (반환값 매수조건만족시 True 나머지는 False)
 def stockrsidays(symbol):
-    url = "https://api.upbit.com/v1/candles/days"
+    url = "https://api.upbit.com/v1/candles/60"
 
     querystring = {"market":symbol,"count":"200"}
 
@@ -129,7 +129,7 @@ def stockrsidays(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=14
+    period=19
     smoothK=3
     smoothD=3
 
@@ -157,11 +157,11 @@ def stockrsidays(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_K > today_D):
+    if(yyester_K<yester_K and yester_K<today_K and today_D < 55):
         condition=True
     return condition
 
-#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 240min (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi240(symbol):
     url = "https://api.upbit.com/v1/candles/minutes/240"
 
@@ -177,7 +177,7 @@ def stockrsi240(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=14
+    period=19
     smoothK=3
     smoothD=3
 
@@ -205,7 +205,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_D<yester_D and yester_D<today_D and today_D <=70):
+    if(yyester_K<yester_K and yester_K<today_K and today_D <=70):
         condition=True
     return condition
 
@@ -327,7 +327,7 @@ def obv(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if(obv[2]<obv[1] and obv[1]<obv[0]):
+    if(obv[1]<obv[0]):
         condition = True
     
     return condition    
