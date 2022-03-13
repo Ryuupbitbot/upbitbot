@@ -21,10 +21,11 @@ import requests
 import datetime 
 
 
+
 ############################### 프로그램 상수 #####################################
 access_key = "9N4F5hD4a7KMemJP3KMfOT7qsNB2m1H60f5di5ol"
 secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX "
-myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNl"
+myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNI"
 
 #투자금액
 invest_money = 200000
@@ -113,8 +114,8 @@ def stockrsiweeks(symbol):
     return condition
 
 
-#스토캐스틱 60mim (반환값 매수조건만족시 True 나머지는 False)
-def stockrsidays(symbol):
+#스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
+def stockrsi60min(symbol):
     url = "https://api.upbit.com/v1/candles/60"
 
     querystring = {"market":symbol,"count":"200"}
@@ -161,7 +162,7 @@ def stockrsidays(symbol):
         condition=True
     return condition
 
-#스토캐스틱 240min (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi240(symbol):
     url = "https://api.upbit.com/v1/candles/minutes/240"
 
