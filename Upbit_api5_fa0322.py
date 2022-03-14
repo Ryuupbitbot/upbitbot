@@ -92,7 +92,7 @@ def stockrsiweeks(symbol):
     ups = ups.drop(ups.index[:(period-1)])
     downs[downs.index[period-1]] = np.mean( downs[:period] )
     downs = downs.drop(downs.index[:(period-1)])
-    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() /          downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
+    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() / downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
     rsi = 100 - 100 / (1 + rs)
 
     stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
@@ -143,7 +143,7 @@ def stockrsi60(symbol):
     ups = ups.drop(ups.index[:(period-1)])
     downs[downs.index[period-1]] = np.mean( downs[:period] )
     downs = downs.drop(downs.index[:(period-1)])
-    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() /          downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
+    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() / downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
     rsi = 100 - 100 / (1 + rs)
 
     stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
@@ -191,7 +191,7 @@ def stockrsi240(symbol):
     ups = ups.drop(ups.index[:(period-1)])
     downs[downs.index[period-1]] = np.mean( downs[:period] )
     downs = downs.drop(downs.index[:(period-1)])
-    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() /          downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
+    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() / downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
     rsi = 100 - 100 / (1 + rs)
 
     stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
