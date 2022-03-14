@@ -116,7 +116,7 @@ def stockrsiweeks(symbol):
 
 #스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi60(symbol):
-    url = "https://api.upbit.com/v1/candles/60"
+    url = "https://api.upbit.com/v1/candles/minutes/60"
 
     querystring = {"market":symbol,"count":"200"}
 
@@ -158,7 +158,7 @@ def stockrsi60(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D < 60):
+    if(yyester_K<yester_K and yester_K<today_K and today_D <=60):
         condition=True
     return condition
 
@@ -316,7 +316,7 @@ def OBV(tradePrice, volume):
 #코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
 def obv(symbol):
     
-    url = "https://api.upbit.com/v1/candles/60"
+    url = "https://api.upbit.com/v1/candles/days"
     querystring = {"market":symbol,"count":"200"}
 
     response = requests.request("GET", url, params=querystring)
