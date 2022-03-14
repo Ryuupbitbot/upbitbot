@@ -79,7 +79,7 @@ def stockrsiweeks(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -115,7 +115,7 @@ def stockrsiweeks(symbol):
 
 
 #스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
-def stockrsi60min(symbol):
+def stockrsi60(symbol):
     url = "https://api.upbit.com/v1/candles/60"
 
     querystring = {"market":symbol,"count":"200"}
@@ -130,7 +130,7 @@ def stockrsi60min(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -158,7 +158,7 @@ def stockrsi60min(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D < 55):
+    if(yyester_K<yester_K and yester_K<today_K and today_D < 60):
         condition=True
     return condition
 
@@ -178,7 +178,7 @@ def stockrsi240(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and stockrsi60min(symbol) and stockrsi240(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol):
+    if(stockrsiweeks(symbol) and stockrsi60(symbol) and stockrsi240(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol)):
         test = True
     return test
 
