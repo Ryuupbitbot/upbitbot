@@ -115,8 +115,8 @@ def stockrsiweeks(symbol):
 
 
 #스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
-def stockrsi60min(symbol):
-    url = "https://api.upbit.com/v1/candles/60"
+def stockrsi60(symbol):
+    url = "https://api.upbit.com/v1/candles/minutes/60"
 
     querystring = {"market":symbol,"count":"200"}
 
@@ -158,11 +158,11 @@ def stockrsi60min(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D < 55):
+    if(yyester_K<yester_K and yester_K<today_K and today_D <=60):
         condition=True
     return condition
 
-#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 240mimin (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi240(symbol):
     url = "https://api.upbit.com/v1/candles/minutes/240"
 
@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
+    if(stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi60(symbol) and stockrsi240):
         test = True
     return test
 
