@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and stockrsi60(symbol) and stockrsi240(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol)):
+    if(stockrsiweeks(symbol) and stockrsi60(symbol) and stockrsi240(symbol) and macd60m(symbol) and macd30m(symbol)):
         test = True
     return test
 
