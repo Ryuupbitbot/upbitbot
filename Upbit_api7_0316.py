@@ -27,7 +27,7 @@ secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX"
 myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNl"
 
 #투자금액
-invest_money = 200000
+invest_money = 300000
 
 #거래할 코인
 krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP', 'KRW-ETC', 'KRW-OMG','KRW-SNT','KRW-WAVES', 
@@ -44,9 +44,9 @@ krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP',
 
 
 #익절,손절 퍼센트
-goodsell_percent = 1.065
-deadsell_percent = 0.93
-buydown_percent = 0.998
+goodsell_percent = 1.045
+deadsell_percent = 0.95
+buydown_percent = 0.995
 aftergoodsell_percent = 0.985 #goodsell각 이후 1.5퍼 떨어지면 매도
 wantgood_sellminus_percent = 0.985  #wantgood_sellminus_percent퍼 떨어지면 wantgood리스트에 보관 후에 3퍼이상일때 매도
 
@@ -109,7 +109,7 @@ def stockrsiweeks(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_D<today_D and today_K > today_D):
+    if(yester_K<today_K and today_K > today_D):
         condition=True
     return condition
 
@@ -158,7 +158,7 @@ def stockrsidays(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_K > today_D):
+    if(yester_K<today_K and today_K > today_D and today_D <=70):
         condition=True
     return condition
 
@@ -178,7 +178,7 @@ def stockrsi240(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -206,7 +206,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_D<yester_D and yester_D<today_D and today_D <=70):
+    if(yyester_K<yester_K and yester_K<today_K and today_D <=70):
         condition=True
     return condition
 
@@ -328,7 +328,7 @@ def obv(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if(obv[2]<obv[1] and obv[1]<obv[0]):
+    if(obv[2]<obv[1]):
         condition = True
     
     return condition    
@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
+    if(stockrsiweeks(symbol) and stockrsidays(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
         test = True
     return test
 
@@ -524,16 +524,4 @@ while True:
         time.sleep(1)
 
         
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
