@@ -109,14 +109,14 @@ def stockrsiweeks(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K<today_K and today_K > today_D):
+    if(yester_K<today_K and today_K>today_D):
         condition=True
     return condition
 
 
-#스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
-def stockrsi60(symbol):
-    url = "https://api.upbit.com/v1/candles/minutes/60"
+#스토캐스틱rsi 1day (반환값 매수조건만족시 True 나머지는 False)
+def stockrsidays(symbol):
+    url = "https://api.upbit.com/v1/candles/days"
 
     querystring = {"market":symbol,"count":"200"}
 
@@ -158,7 +158,7 @@ def stockrsi60(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D <=60):
+    if(today_K > today_D and yester_K<today_K and today_D <=70):
         condition=True
     return condition
 
@@ -206,7 +206,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D <=70):
+    if(yyester_K<yester_K and yester_K<today_K and today_K>today_D and today_D <=70):
         condition=True
     return condition
 
@@ -343,7 +343,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
+    if(stockrsiweeks(symbol) and stockrsidays(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
         test = True
     return test
 
