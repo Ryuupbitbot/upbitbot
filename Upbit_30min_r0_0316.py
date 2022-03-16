@@ -27,7 +27,7 @@ secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX"
 myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNl"
 
 #투자금액
-invest_money = 300000
+invest_money = 100000
 
 #거래할 코인
 krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP', 'KRW-ETC', 'KRW-OMG','KRW-SNT','KRW-WAVES', 
@@ -45,7 +45,7 @@ krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP',
 
 #익절,손절 퍼센트
 goodsell_percent = 1.045
-deadsell_percent = 0.95
+deadsell_percent = 0.93
 buydown_percent = 0.995
 aftergoodsell_percent = 0.985 #goodsell각 이후 1.5퍼 떨어지면 매도
 wantgood_sellminus_percent = 0.985  #wantgood_sellminus_percent퍼 떨어지면 wantgood리스트에 보관 후에 3퍼이상일때 매도
@@ -158,11 +158,11 @@ def stockrsidays(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K<today_K and today_K > today_D and today_D <=70):
+    if(yester_K<today_K and today_D <=70):
         condition=True
     return condition
 
-#스토캐스틱 1day (반환값 매수조건만족시 True 나머지는 False)
+#스토캐스틱 240min (반환값 매수조건만족시 True 나머지는 False)
 def stockrsi240(symbol):
     url = "https://api.upbit.com/v1/candles/minutes/240"
 
@@ -206,7 +206,55 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yyester_K<yester_K and yester_K<today_K and today_D <=70):
+    if(today_D<today_K and yester_K<today_K and today_D <=70):
+        condition=True
+    return condition
+
+#스토캐스틱 60min (반환값 매수조건만족시 True 나머지는 False)
+def stockrsi60(symbol):
+    url = "https://api.upbit.com/v1/candles/minutes/60"
+
+    querystring = {"market":symbol,"count":"200"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    df = pd.DataFrame(data)
+
+    series=df['trade_price'].iloc[::-1]
+
+    df = pd.Series(df['trade_price'].values)
+
+    period=14
+    smoothK=3
+    smoothD=3
+
+    delta = series.diff().dropna()
+    ups = delta * 0
+    downs = ups.copy()
+    ups[delta > 0] = delta[delta > 0]
+    downs[delta < 0] = -delta[delta < 0]
+    ups[ups.index[period-1]] = np.mean( ups[:period] )
+    ups = ups.drop(ups.index[:(period-1)])
+    downs[downs.index[period-1]] = np.mean( downs[:period] )
+    downs = downs.drop(downs.index[:(period-1)])
+    rs = ups.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() /          downs.ewm(com=period-1,min_periods=0,adjust=False,ignore_na=False).mean() 
+    rsi = 100 - 100 / (1 + rs)
+
+    stochrsi  = (rsi - rsi.rolling(period).min()) / (rsi.rolling(period).max() - rsi.rolling(period).min())
+    stochrsi_K = stochrsi.rolling(smoothK).mean()
+    stochrsi_D = stochrsi_K.rolling(smoothD).mean()
+
+
+    condition = False;
+    yyester_K=stochrsi_K.iloc[-3]*100
+    yyester_D=stochrsi_D.iloc[-3]*100
+    yester_K=stochrsi_K.iloc[-2]*100
+    yester_D=stochrsi_D.iloc[-2]*100
+    today_K=stochrsi_K.iloc[-1]*100
+    today_D=stochrsi_D.iloc[-1]*100
+    if(today_D<today_K and yester_K<today_K and today_D <=70):
         condition=True
     return condition
 
@@ -234,15 +282,15 @@ def macddays(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if(macd[2]<macd[1] and macd[1]<macd[0] and macd[0] >exp3[0]):
+    if(macd[2]<macd[1] and macd[1]<macd[0] and macd[0]>exp3[0]):
         condition = True
 
     return condition
 
-#macd 60분 (반환값 매수조건만족시 True 나머지는 False)
-def macd60m(symbol):
+#macd 30분 (반환값 매수조건만족시 True 나머지는 False)
+def macd30m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/60"
+    url = "https://api.upbit.com/v1/candles/minutes/30"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -263,15 +311,15 @@ def macd60m(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if((macd[1]-exp3[1])> 0 or (macd[0]-exp3[0]) > 0):
+    if(((macd[1]-exp3[1])<=0) and ((macd[0]-exp3[0])>0)):
         condition = True
 
     return condition
 
-#MACD 30분 (반환값 매수조건만족시 True 나머지는 False)
-def macd30m(symbol):
+#MACD 60분 (반환값 매수조건만족시 True 나머지는 False)
+def macd60m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/30"
+    url = "https://api.upbit.com/v1/candles/minutes/60"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -343,7 +391,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and stockrsidays(symbol) and macd60m(symbol) and macd30m(symbol) and stockrsi240):
+    if(stockrsiweeks(symbol) and stockrsidays(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol) and stockrsi60(symbol) and stockrsi240):
         test = True
     return test
 
