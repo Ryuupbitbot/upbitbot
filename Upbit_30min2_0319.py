@@ -206,7 +206,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K<today_K and today_D <=70):
+    if(yester_K<today_K and today_D <=75):
         condition=True
     return condition
 
@@ -254,7 +254,7 @@ def stockrsi60(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K<today_K and today_D <=70):
+    if(yester_K<today_K and today_D <=75):
         condition=True
     return condition
 
@@ -311,7 +311,7 @@ def macd30m(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if((((macd[2]-exp3[2])<=0) and ((macd[1]-exp3[1])>0)) or (((macd[1]-exp3[1])<=0) and ((macd[0]-exp3[0])>0))):
+    if((((macd[2]-exp3[2])<0) and ((macd[1]-exp3[1])>=0)) or (((macd[1]-exp3[1])<0) and ((macd[0]-exp3[0])>=0))):
         condition = True
 
     return condition
@@ -364,7 +364,7 @@ def OBV(tradePrice, volume):
 #코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
 def obv(symbol):
     
-    url = "https://api.upbit.com/v1/candles/days"
+    url = "https://api.upbit.com/v1/candles/minutes/30"
     querystring = {"market":symbol,"count":"200"}
 
     response = requests.request("GET", url, params=querystring)
@@ -376,7 +376,7 @@ def obv(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if(obv[2]<obv[1]<obv[0]):
+    if(((obv[2]*1.15)<obv[1]) or ((obv[1]*1.15)<obv[0])):
         condition = True
     
     return condition    
