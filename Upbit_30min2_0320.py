@@ -44,11 +44,11 @@ krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP',
 
 
 #익절,손절 퍼센트
-goodsell_percent = 1.045
+goodsell_percent = 1.05
 deadsell_percent = 0.93
 buydown_percent = 0.995
 aftergoodsell_percent = 0.985 #goodsell각 이후 1.5퍼 떨어지면 매도
-wantgood_sellminus_percent = 0.985  #wantgood_sellminus_percent퍼 떨어지면 wantgood리스트에 보관 후에 3퍼이상일때 매도
+wantgood_sellminus_percent = 0.98  #wantgood_sellminus_percent퍼 떨어지면 wantgood리스트에 보관 후에 3퍼이상일때 매도
 
 ################################# 함수 ####################################
 upbit = pyupbit.Upbit(access_key, secret_key) # pyupbit 사용하기 위함
@@ -79,7 +79,7 @@ def stockrsiweeks(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -130,7 +130,7 @@ def stockrsidays(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=19
+    period=14
     smoothK=3
     smoothD=3
 
@@ -282,7 +282,7 @@ def macddays(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if(macd[1]<macd[0] and macd[0]>exp3[0]):
+    if((macd[1]-exp3[1])<(macd[0]-exp3[0])):
         condition = True
 
     return condition
@@ -311,7 +311,7 @@ def macd30m(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if((((macd[2]-exp3[2])<0) and ((macd[1]-exp3[1])>=0)) or (((macd[1]-exp3[1])<0) and ((macd[0]-exp3[0])>=0))):
+    if(((macd[2]-exp3[2]<0) and (macd[1]-exp3[1]>=0)) or ((macd[1]-exp3[1]<0) and (macd[0]-exp3[0]>=0))):
         condition = True
 
     return condition
@@ -376,7 +376,7 @@ def obv(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if(((obv[2]*1.15)<obv[1]) or ((obv[1]*1.15)<obv[0])):
+    if((obv[2]*1.15 < obv[1]) or (obv[1]*1.15 < obv[0])):
         condition = True
     
     return condition    
