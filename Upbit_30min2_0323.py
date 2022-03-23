@@ -376,7 +376,7 @@ def obv(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if((obv[2]*1.15 < obv[1] and obv[0] > 0) or (obv[1]*1.15 < obv[0] and obv[0] > 0)):
+    if(((obv[2]*1.18 < obv[0]) or (obv[1]*1.12 < obv[0])) and (obv[0] > 0)):
         condition = True
     
     return condition    
