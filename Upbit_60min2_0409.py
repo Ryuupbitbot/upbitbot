@@ -27,14 +27,14 @@ secret_key = "Do6mrNXjNC2pSyvGb5b0x3EcCJRNxxZb1ixNnEdX"
 myToken = "xoxb-2871923715953-2852604955318-wu9blfcJVprOgvwtjcrHncNl"
 
 #투자금액
-invest_money = 100000
+invest_money = 300000
 
 #거래할 코인
 krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP', 'KRW-ETC', 'KRW-OMG','KRW-SNT','KRW-WAVES', 
                'KRW-XEM', 'KRW-QTUM', 'KRW-LSK', 'KRW-STEEM', 'KRW-XLM', 'KRW-ARDR', 'KRW-ARK', 'KRW-STORJ','KRW-GRS', 'KRW-REP', 
                'KRW-ADA', 'KRW-SBD', 'KRW-POWR', 'KRW-BTG', 'KRW-ICX', 'KRW-EOS', 'KRW-TRX', 'KRW-SC', 'KRW-ONT', 'KRW-ZIL',
                'KRW-POLY', 'KRW-ZRX', 'KRW-LOOM', 'KRW-BCH', 'KRW-BAT', 'KRW-IOST', 'KRW-RFR', 'KRW-CVC', 'KRW-IQ', 'KRW-IOTA', 
-               'KRW-MFT', 'KRW-ONG', 'KRW-GAS', 'KRW-UPP', 'KRW-ELF', 'KRW-KNC', 'KRW-BSV', 'KRW-THETA', 'KRW-QKC', 'KRW-BTT', 
+               'KRW-MFT', 'KRW-ONG', 'KRW-GAS', 'KRW-UPP', 'KRW-ELF', 'KRW-KNC', 'KRW-BSV', 'KRW-THETA', 'KRW-QKC', 
                'KRW-MOC', 'KRW-ENJ', 'KRW-TFUEL', 'KRW-MANA', 'KRW-ANKR', 'KRW-AERGO', 'KRW-ATOM', 'KRW-TT', 'KRW-CRE', 'KRW-MBL',
                'KRW-WAXP', 'KRW-HBAR', 'KRW-MED', 'KRW-MLK', 'KRW-STPT', 'KRW-ORBS', 'KRW-VET', 'KRW-CHZ', 'KRW-STMX', 'KRW-DKA',
                'KRW-HIVE', 'KRW-KAVA', 'KRW-AHT', 'KRW-LINK', 'KRW-XTZ', 'KRW-BORA', 'KRW-JST', 'KRW-CRO', 'KRW-TON', 'KRW-SXP',
@@ -206,7 +206,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K < today_K and today_D <= 75):
+    if(yester_K < today_K and today_D < 75):
         condition=True
     return condition
 
@@ -254,7 +254,7 @@ def stockrsi60(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K < today_K and today_D <= 75):
+    if(yester_K < today_K and today_D < today_K):
         condition=True
     return condition
 
@@ -287,10 +287,10 @@ def macddays(symbol):
 
     return condition
 
-#macd 30분 (반환값 매수조건만족시 True 나머지는 False)
-def macd30m(symbol):
+#macd 60분 (반환값 매수조건만족시 True 나머지는 False)
+def macd60m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/30"
+    url = "https://api.upbit.com/v1/candles/minutes/60"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -316,10 +316,10 @@ def macd30m(symbol):
 
     return condition
 
-#MACD 60분 (반환값 매수조건만족시 True 나머지는 False)
-def macd60m(symbol):
+#MACD 30분 (반환값 매수조건만족시 True 나머지는 False)
+def macd30m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/60"
+    url = "https://api.upbit.com/v1/candles/minutes/30"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -362,9 +362,29 @@ def OBV(tradePrice, volume):
     return obv
 
 #코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
-def obv(symbol):
+def obvdays(symbol):
     
-    url = "https://api.upbit.com/v1/candles/minutes/30"
+    url = "https://api.upbit.com/v1/candles/days"
+    querystring = {"market":symbol,"count":"200"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    df = pd.DataFrame(data)
+    df=df.iloc[::-1]
+
+    obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
+    condition= False
+    if(((obv[2]*1.18 < obv[0]) or (obv[1]*1.12 < obv[0])) and (obv[0] > 0)):
+        condition = True
+    
+    return condition    
+
+#코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
+def obv60m(symbol):
+    
+    url = "https://api.upbit.com/v1/candles/minutes/60"
     querystring = {"market":symbol,"count":"200"}
 
     response = requests.request("GET", url, params=querystring)
@@ -382,6 +402,7 @@ def obv(symbol):
     return condition    
 
 
+
 #내 KRW 자산 조회
 def get_my_KRW_Balance():
     return upbit.get_balance("KRW")
@@ -391,7 +412,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(stockrsiweeks(symbol) and stockrsidays(symbol) and macddays(symbol) and macd60m(symbol) and macd30m(symbol) and obv(symbol) and stockrsi60(symbol) and stockrsi240):
+    if(macd60m(symbol) and macd30m(symbol) and (stockrsiweeks(symbol) or stockrsidays(symbol)) and obvdays(symbol) and obv60m(symbol) and stockrsi60(symbol) and stockrsi240(symbol)):
         test = True
     return test
 
