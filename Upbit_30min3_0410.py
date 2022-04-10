@@ -34,7 +34,7 @@ krw_tickers = ['KRW-BTC', 'KRW-ETH', 'KRW-NEO', 'KRW-MTL', 'KRW-LTC', 'KRW-XRP',
                'KRW-XEM', 'KRW-QTUM', 'KRW-LSK', 'KRW-STEEM', 'KRW-XLM', 'KRW-ARDR', 'KRW-ARK', 'KRW-STORJ','KRW-GRS', 'KRW-REP', 
                'KRW-ADA', 'KRW-SBD', 'KRW-POWR', 'KRW-BTG', 'KRW-ICX', 'KRW-EOS', 'KRW-TRX', 'KRW-SC', 'KRW-ONT', 'KRW-ZIL',
                'KRW-POLY', 'KRW-ZRX', 'KRW-LOOM', 'KRW-BCH', 'KRW-BAT', 'KRW-IOST', 'KRW-RFR', 'KRW-CVC', 'KRW-IQ', 'KRW-IOTA', 
-               'KRW-MFT', 'KRW-ONG', 'KRW-GAS', 'KRW-UPP', 'KRW-ELF', 'KRW-KNC', 'KRW-BSV', 'KRW-THETA', 'KRW-QKC', 
+               'KRW-MFT', 'KRW-ONG', 'KRW-GAS', 'KRW-UPP', 'KRW-ELF', 'KRW-KNC', 'KRW-BSV', 'KRW-THETA', 'KRW-QKC', 'KRW-AVAX',
                'KRW-MOC', 'KRW-ENJ', 'KRW-TFUEL', 'KRW-MANA', 'KRW-ANKR', 'KRW-AERGO', 'KRW-ATOM', 'KRW-TT', 'KRW-CRE', 'KRW-MBL',
                'KRW-WAXP', 'KRW-HBAR', 'KRW-MED', 'KRW-MLK', 'KRW-STPT', 'KRW-ORBS', 'KRW-VET', 'KRW-CHZ', 'KRW-STMX', 'KRW-DKA',
                'KRW-HIVE', 'KRW-KAVA', 'KRW-AHT', 'KRW-LINK', 'KRW-XTZ', 'KRW-BORA', 'KRW-JST', 'KRW-CRO', 'KRW-TON', 'KRW-SXP',
@@ -287,10 +287,10 @@ def macddays(symbol):
 
     return condition
 
-#macd 60분 (반환값 매수조건만족시 True 나머지는 False)
-def macd60m(symbol):
+#macd 30분 (반환값 매수조건만족시 True 나머지는 False)
+def macd30m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/60"
+    url = "https://api.upbit.com/v1/candles/minutes/30"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -316,10 +316,10 @@ def macd60m(symbol):
 
     return condition
 
-#MACD 30분 (반환값 매수조건만족시 True 나머지는 False)
-def macd30m(symbol):
+#MACD 60분 (반환값 매수조건만족시 True 나머지는 False)
+def macd60m(symbol):
 
-    url = "https://api.upbit.com/v1/candles/minutes/30"
+    url = "https://api.upbit.com/v1/candles/minutes/60"
 
 
     querystring = {"market":symbol,"count":"200"}
@@ -362,26 +362,6 @@ def OBV(tradePrice, volume):
     return obv
 
 #코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
-def obvdays(symbol):
-    
-    url = "https://api.upbit.com/v1/candles/days"
-    querystring = {"market":symbol,"count":"200"}
-
-    response = requests.request("GET", url, params=querystring)
-
-    data = response.json()
-
-    df = pd.DataFrame(data)
-    df=df.iloc[::-1]
-
-    obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
-    condition= False
-    if(((obv[2]*1.18 < obv[0]) or (obv[1]*1.12 < obv[0])) and (obv[0] > 0)):
-        condition = True
-    
-    return condition    
-
-#코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
 def obv60m(symbol):
     
     url = "https://api.upbit.com/v1/candles/minutes/60"
@@ -396,7 +376,27 @@ def obv60m(symbol):
 
     obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
     condition= False
-    if(((obv[2]*1.18 < obv[0]) or (obv[1]*1.12 < obv[0])) and (obv[0] > 0)):
+    if(((obv[2]*1.08 < obv[0]) or (obv[1]*1.04 < obv[0])) and (obv[0] > 0)):
+        condition = True
+    
+    return condition    
+
+#코인의 OBV 매수조건 테스트 (반환값 매수조건만족시 True 나머지는 False)
+def obv30m(symbol):
+    
+    url = "https://api.upbit.com/v1/candles/minutes/30"
+    querystring = {"market":symbol,"count":"200"}
+
+    response = requests.request("GET", url, params=querystring)
+
+    data = response.json()
+
+    df = pd.DataFrame(data)
+    df=df.iloc[::-1]
+
+    obv = OBV(df['trade_price'],df['candle_acc_trade_volume'])
+    condition= False
+    if(((obv[2]*1.10 < obv[0]) or (obv[1]*1.06 < obv[0])) and (obv[0] > 0)):
         condition = True
     
     return condition    
@@ -412,7 +412,7 @@ def get_my_KRW_Balance():
 # 모든 매수조건 만족 테스트
 def buy_test (symbol):
     test = False
-    if(macd60m(symbol) and macd30m(symbol) and (stockrsiweeks(symbol) or stockrsidays(symbol)) and obvdays(symbol) and obv60m(symbol) and stockrsi60(symbol) and stockrsi240(symbol)):
+    if(macd60m(symbol) and macd30m(symbol) and (stockrsiweeks(symbol) or stockrsidays(symbol)) and (obv60m(symbol) or obv30m(symbol)) and stockrsi60(symbol) and stockrsi240(symbol) and macddays(symbol)):
         test = True
     return test
 
