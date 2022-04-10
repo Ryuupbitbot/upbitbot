@@ -109,7 +109,7 @@ def stockrsiweeks(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K < today_K and today_K > today_D):
+    if(yester_K < today_K and today_D < today_K):
         condition=True
     return condition
 
@@ -311,7 +311,7 @@ def macd30m(symbol):
     exp3 = macd.ewm(span=9, adjust=False).mean()  #signal
 
     condition = False
-    if(((macd[2]-exp3[2] < 0) and (macd[1]-exp3[1] >= 0)) or ((macd[1]-exp3[1] < 0) and (macd[0]-exp3[0] >= 0))):
+    if((((macd[2]-exp3[2]) < 0) and ((macd[1]-exp3[1]) >= 0)) or (((macd[1]-exp3[1]) < 0) and ((macd[0]-exp3[0]) >= 0))):
         condition = True
 
     return condition
