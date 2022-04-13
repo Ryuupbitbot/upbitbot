@@ -79,7 +79,7 @@ def stockrsiweeks(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=14
+    period=9
     smoothK=3
     smoothD=3
 
@@ -130,7 +130,7 @@ def stockrsidays(symbol):
 
     df = pd.Series(df['trade_price'].values)
 
-    period=14
+    period=10
     smoothK=3
     smoothD=3
 
@@ -206,7 +206,7 @@ def stockrsi240(symbol):
     yester_D=stochrsi_D.iloc[-2]*100
     today_K=stochrsi_K.iloc[-1]*100
     today_D=stochrsi_D.iloc[-1]*100
-    if(yester_K < today_K and today_D < 75):
+    if(yester_K < today_K and today_D < today_K):
         condition=True
     return condition
 
